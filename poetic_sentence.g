@@ -9,6 +9,7 @@ The <object> <verb> tonight.
 waves
 big yellow flowers
 slugs
+party rockers
 }
 
 {
@@ -16,6 +17,7 @@ slugs
 sigh <adverb>
 portend like <object>
 die <adverb>
+in the house
 }
 
 {

@@ -27,6 +27,7 @@ public class RandomPhraseGenerator {
 
 		// Pick a start and fill in the non-terminals
 		for (int i = 0; i < numPhrases; i++) {
+
 			System.out.println(myGrammar.generatePhrase());
 		}
 		// String phrase = myGrammar.GetWordByKey("start");
@@ -92,35 +93,41 @@ class Grammar {
 		StringBuilder builder = new StringBuilder();
 		boolean finished = false;
 		String phrase = this.GetWordByKey("start");
+		// System.out.println(phrase);
 		scn = new Scanner(phrase);
 		String current;
 		while (!finished) {
 			finished = true;
 			if (scn.hasNext()) {
-				current = scn.next();
 
 				while (scn.hasNext()) {
-
+					current = scn.next();
 					if (current.charAt(0) == '<' && current.charAt(current.length() - 1) == '>') {
 						finished = false;
 						builder.append(this.GetWordByKey(current.substring(1, current.length() - 1)));
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
 					} else {
 						builder.append(current);
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
 					}
-					current = scn.next();
+					// current = scn.next();
+					// System.out.println(builder.toString());
 				}
 			}
 
 			phrase = builder.toString();
 			builder = new StringBuilder();
+			scn = new Scanner(phrase);
 		}
+		System.out.println("\n" + "Finished generating " + "phrase");
 		return phrase;
 	}
 
 	public String GetWordByKey(String key) {
-		System.out.println();
-		System.out.println();
-		System.out.println();
 		int range = map.get(key).size();
 		// System.out.println(map.get(key).get(0) + " " + range);
 
