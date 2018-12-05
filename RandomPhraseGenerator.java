@@ -29,6 +29,7 @@ public class RandomPhraseGenerator {
 		for (int i = 0; i < numPhrases; i++) {
 
 			System.out.println(myGrammar.generatePhrase());
+			System.out.println();
 		}
 		// String phrase = myGrammar.GetWordByKey("start");
 
@@ -37,12 +38,24 @@ public class RandomPhraseGenerator {
 	}
 }
 
+/**
+ * This class represents a grammar file as an object for ease of use.
+ * 
+ * @author chris
+ *
+ */
 class Grammar {
 	static Scanner scn;
 	Random rand = new Random();
 
 	HashMap<String, ArrayList<String>> map = new HashMap<String, ArrayList<String>>();
 
+	/**
+	 * This constructor constructs a grammar object based on the file input and
+	 * represents it with a hash map.
+	 * 
+	 * @param File input
+	 */
 	public Grammar(File input) {
 		try {
 			scn = new Scanner(input);
@@ -57,13 +70,8 @@ class Grammar {
 			current = scn.next();
 			if (current.equals("{")) {
 
-				// System.out.println("found a {");
-
 				current = scn.next();
 
-				// System.out.println(" " + current);
-
-				// TODO need to switch to while loop to find the next valid element.
 				while (current.charAt(0) != '<' && current.charAt(current.length() - 1) != '>') {
 
 					current = scn.next();
@@ -71,8 +79,6 @@ class Grammar {
 
 				// System.out.println("found a non terminal title.");
 				builder.append(current.substring(1, current.length() - 1));
-
-				// System.out.println(builder.toString());
 
 				map.put(builder.toString(), new ArrayList<String>());
 				String item = scn.nextLine();
@@ -89,11 +95,14 @@ class Grammar {
 
 	}
 
+	/**
+	 * This method uses the values saved in the grammar hash map to construct one random phrase.
+	 * @return String phrase
+	 */
 	public String generatePhrase() {
 		StringBuilder builder = new StringBuilder();
 		boolean finished = false;
 		String phrase = this.GetWordByKey("start");
-		// System.out.println(phrase);
 		scn = new Scanner(phrase);
 		String current;
 		while (!finished) {
@@ -102,20 +111,79 @@ class Grammar {
 
 				while (scn.hasNext()) {
 					current = scn.next();
-					if (current.charAt(0) == '<' && current.charAt(current.length() - 1) == '>') {
+					if (current.charAt(0) == '<' && current.charAt(current.length() - 1) == '>') {//detect non-terminals with no punctuation
 						finished = false;
 						builder.append(this.GetWordByKey(current.substring(1, current.length() - 1)));
 						if (scn.hasNext()) {
 							builder.append(" ");
 						}
-					} else {
+					}
+					//check for non terminals with punctuation at the end, both ends (like quotation marks), and at the beginning.
+					else if (current.charAt(0) == '<' && current.charAt(current.length() - 2) == '>') {//find punctuation at the end
+						finished = false;
+						builder.append(this.GetWordByKey(current.substring(1, current.length() - 2)));
+						builder.append(current.charAt(current.length() - 1));
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
+					}
+					//find punctuation at the ends
+					else if (current.length() >= 4 && current.charAt(1) == '<' && current.charAt(current.length() - 2) == '>') {
+						finished = false;
+						builder.append(current.charAt(0));
+						builder.append(this.GetWordByKey(current.substring(2, current.length() - 2)));
+						builder.append(current.charAt(current.length() - 1));
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
+					}
+					//find punctuation at the start
+					else if (current.length() >= 3 && current.charAt(1) == '<' && current.charAt(current.length() - 1) == '>') {
+						finished = false;
+						builder.append(current.charAt(0));
+						builder.append(this.GetWordByKey(current.substring(2, current.length() - 1)));
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
+					}
+					//find double punctuation at the end
+					else if (current.length() >= 6 && current.charAt(0) == '<' && current.charAt(current.length() - 3) == '>') {
+						finished = false;
+						builder.append(this.GetWordByKey(current.substring(1, current.length() - 3)));
+						builder.append(current.charAt(current.length() - 2));
+						builder.append(current.charAt(current.length() - 1));
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
+					}
+					//find double punctuation at both ends
+					else if (current.length() >= 6 && current.charAt(2) == '<' && current.charAt(current.length() - 3) == '>') {
+						finished = false;
+						builder.append(current.charAt(0));
+						builder.append(current.charAt(1));
+						builder.append(this.GetWordByKey(current.substring(3, current.length() - 3)));
+						builder.append(current.charAt(current.length() - 2));
+						builder.append(current.charAt(current.length() - 1));
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
+					}
+					//find double punctuation at the beginning
+					else if (current.length() >= 6 && current.charAt(2) == '<' && current.charAt(current.length() - 1) == '>') {
+						finished = false;
+						builder.append(current.charAt(0));
+						builder.append(current.charAt(1));
+						builder.append(this.GetWordByKey(current.substring(3, current.length() - 1)));
+						if (scn.hasNext()) {
+							builder.append(" ");
+						}
+					}
+					else {
 						builder.append(current);
 						if (scn.hasNext()) {
 							builder.append(" ");
 						}
 					}
-					// current = scn.next();
-					// System.out.println(builder.toString());
 				}
 			}
 
@@ -123,14 +191,19 @@ class Grammar {
 			builder = new StringBuilder();
 			scn = new Scanner(phrase);
 		}
-		System.out.println("\n" + "Finished generating " + "phrase");
+		//System.out.println("\n" + "Finished generating " + "phrase");
 		return phrase;
 	}
 
+	/**
+	 * This helper method randomly selects a word to replace any non-terminals we
+	 * find in generatePhrase()
+	 * 
+	 * @param key
+	 * @return String temp
+	 */
 	public String GetWordByKey(String key) {
 		int range = map.get(key).size();
-		// System.out.println(map.get(key).get(0) + " " + range);
-
 		String temp = map.get(key).get(Math.abs(rand.nextInt(range)));
 		return temp;
 	}
